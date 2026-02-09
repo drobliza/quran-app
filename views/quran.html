@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>القرآن حسب حالتك - فقاعات</title>
+<title>القرآن حسب حالتك</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
 <style>
 body{
@@ -13,100 +13,60 @@ body{
   justify-content:center;
   align-items:center;
   height:100vh;
-  overflow:hidden;
-  transition: background 1s;
-  position: relative;
-}
-body.dim{background:linear-gradient(#0f1f14,#000);}
-#canvas-bubbles{
-  position:fixed;
-  top:0; left:0;
-  width:100%;
-  height:100%;
-  z-index:0;
 }
 .app{
   background:white;
   width:90%;
-  max-width:400px;
+  max-width:450px;
   padding:20px;
   border-radius:20px;
   box-shadow:0 0 15px rgba(0,0,0,0.1);
   text-align:center;
-  z-index:1;
 }
 h1{color:#2e7d32;}
-.moods{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-}
-.moods button{
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  background:#e8f5e9;
-  font-size:16px;
-  cursor:pointer;
-  transition: all 0.3s;
-}
-.moods button:hover{
-  background:#c8e6c9;
-  transform: scale(1.05);
-}
-.result{display:none;margin-top:15px;}
-.ayah-box{
-  position:relative;
-  padding:15px;
-  border-radius:16px;
-  margin-bottom:10px;
-  overflow:hidden;
-  box-shadow:0 0 8px rgba(46,125,50,0.2),0 0 20px rgba(46,125,50,0.15);
-}
+select,input{padding:6px;border-radius:8px;font-family:Amiri;margin-bottom:5px;}
+.moods{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.moods button{padding:12px;border:none;border-radius:12px;background:#e8f5e9;}
+.result{display:none;margin-top:10px;}
+.ayah-box{padding:15px;border-radius:16px;box-shadow:0 0 10px rgba(46,125,50,.2);}
 #ayah{
-  font-size:24px;
+  font-size:22px;
   line-height:1.9;
-  white-space: pre-wrap;
-  text-align:center;
-  margin-bottom:5px;
-  direction: rtl;
-  unicode-bidi: plaintext;
+  opacity:0;
+  transform:scale(.95);
+  background:linear-gradient(90deg,#1b5e20,#43a047,#1b5e20);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:appear 1s forwards,grad 6s infinite;
 }
-.meaning,.action{font-size:14px;margin-bottom:8px;}
-.controls button{
-  margin:5px;
-  padding:8px 12px;
-  border:none;
-  border-radius:10px;
-  background:#2e7d32;
-  color:white;
-  cursor:pointer;
-}
-.ayah-box.listening{box-shadow:0 0 25px rgba(67,160,71,0.6);}
+@keyframes appear{to{opacity:1;transform:scale(1);}}
+@keyframes grad{0%{background-position:0%}50%{background-position:100%}100%{background-position:0%}}
+.controls button{margin:4px;padding:6px 10px;border:none;border-radius:10px;background:#2e7d32;color:white;}
+#tafsir{font-size:14px;background:#f9f9f9;padding:8px;border-radius:8px;margin-top:6px;}
 </style>
 </head>
 <body>
 
-<a href="/logout" style="position:fixed;top:10px;left:10px;background:#2e7d32;color:white;padding:8px 12px;border-radius:8px;text-decoration:none;">
-🚪 خروج
-</a>
-
-<canvas id="canvas-bubbles"></canvas>
-
 <div class="app">
 <h1>📖 القرآن لك</h1>
 
-<select id="reciterSelect" onchange="changeReciter()" style="margin-bottom:10px;padding:8px;border-radius:10px;font-family:Amiri;">
-  <option value="ar.alafasy">🎙️ مشاري العفاسي</option>
-  <option value="ar.abdulbasitmurattal">🎙️ عبد الباسط</option>
-  <option value="ar.husary">🎙️ الحصري</option>
-  <option value="ar.minshawi">🎙️ المنشاوي</option>
-  <option value="ar.sudais">🎙️ السديس</option>
-  <option value="ar.mahermuaiqly">🎙️ ماهر المعيقلي</option>
+<select id="reciterSelect" onchange="changeReciter()">
+<option value="ar.alafasy">مشاري العفاسي</option>
+<option value="ar.abdulbasitmurattal">عبد الباسط</option>
+<option value="ar.husary">الحصري</option>
+<option value="ar.minshawi">المنشاوي</option>
+<option value="ar.sudais">السديس</option>
+<option value="ar.mahermuaiqly">ماهر المعيقلي</option>
 </select>
 
-<h2>كيف تشعر اليوم؟</h2>
+<div>
+<select id="surahSelect"></select>
+<input type="number" id="ayahInput" placeholder="آية" min="1" style="width:70px;">
+<button onclick="loadCustomAyah()">اذهب</button>
+<button onclick="playFullSurah()">تشغيل السورة</button>
+</div>
 
+<h3>كيف تشعر اليوم؟</h3>
 <div class="moods" id="moods">
 <button onclick="chooseMood('sad')">😔 حزين</button>
 <button onclick="chooseMood('fear')">😟 قلق</button>
@@ -118,71 +78,95 @@ h1{color:#2e7d32;}
 </div>
 
 <div class="result" id="result">
-<div class="ayah-box" id="ayahBox">
-  <div id="ayah"></div>
+<div class="ayah-box">
+<div id="ayah"></div>
 </div>
-<div class="meaning" id="meaning"></div>
-<div class="action" id="action"></div>
+<div id="meaning"></div>
+<div id="tafsir"></div>
 <div class="controls">
-<button onclick="newAyah()">🔄 آية أخرى</button>
-<button onclick="playAudio()">🎧 استماع</button>
-<button onclick="goBack()">🔙 رجوع</button>
+<button onclick="newAyah()">آية أخرى</button>
+<button onclick="playAudio()">استماع</button>
+<button onclick="goBack()">رجوع</button>
 </div>
 <audio id="audio"></audio>
 </div>
 </div>
 
 <script>
-let currentReciter = "ar.alafasy";
+const surahs=[ "الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس" ];
 
-const moods = {
-  sad:[2,286,153,87,255,18,39,42],
-  fear:[3,173,40,129,45,9],
-  angry:[5,134,37,200,16,60],
-  dua:[1,60,186,55,100,101],
-  repent:[53,222,8,110,25,32,50],
-  patience:[155,200,10,94,110],
-  hope:[13,19,24,37,57,90]
-};
+surahs.forEach((s,i)=>{
+ let o=document.createElement("option");
+ o.value=i+1; o.textContent=(i+1)+" - "+s;
+ surahSelect.appendChild(o);
+});
 
+let currentReciter="ar.alafasy";
 let currentMood="";
-let lastAyah=null;
+let lastSurah=1,lastAyah=1;
 
-async function getAyah(num){
-  const url="https://api.alquran.cloud/v1/ayah/"+num+"/"+currentReciter;
-  const res=await fetch(url);
-  const data=await res.json();
-  document.getElementById("ayah").innerText="﴿ "+data.data.text+" ﴾";
-  document.getElementById("meaning").innerText="📖 "+data.data.surah.name+" - آية "+data.data.numberInSurah;
-  document.getElementById("audio").src=data.data.audio;
-  lastAyah=num;
+const moods={sad:[[2,286],[93,3]],fear:[[3,173]],angry:[[41,34]],dua:[[1,60]],repent:[[39,53]],patience:[[2,153]],hope:[[94,6]]};
+
+async function getAyah(s,a){
+ const url=`https://api.alquran.cloud/v1/ayah/${s}:${a}/${currentReciter}`;
+ const res=await fetch(url);
+ const data=await res.json();
+ typeAyah("﴿ "+data.data.text+" ﴾");
+ meaning.innerText=data.data.surah.name+" - آية "+data.data.numberInSurah;
+ audio.src=data.data.audio;
+ lastSurah=s; lastAyah=a;
+ loadTafsir(s,a);
 }
 
-function changeReciter(){
-  currentReciter=document.getElementById("reciterSelect").value;
-  if(lastAyah) getAyah(lastAyah);
+async function loadTafsir(s,a){
+ const url=`https://api.alquran.cloud/v1/ayah/${s}:${a}/ar.muyassar`;
+ const res=await fetch(url);
+ const data=await res.json();
+ tafsir.innerText="📘 التفسير: "+data.data.text;
 }
 
-function chooseMood(mood){
-  currentMood=mood;
-  document.getElementById("moods").style.display="none";
-  document.getElementById("result").style.display="block";
-  newAyah();
+function typeAyah(t){
+ ayah.textContent="";
+ ayah.style.animation="none"; void ayah.offsetWidth; ayah.style.animation=null;
+ let i=0;
+ const it=setInterval(()=>{ayah.textContent+=t[i++]; if(i>=t.length)clearInterval(it)},30);
+}
+
+function loadCustomAyah(){
+ getAyah(surahSelect.value,ayahInput.value);
+ result.style.display="block"; moodsDiv.style.display="none";
+}
+
+function chooseMood(m){
+ currentMood=m;
+ const pick=moods[m][0];
+ getAyah(pick[0],pick[1]);
+ result.style.display="block"; moodsDiv.style.display="none";
 }
 
 function newAyah(){
-  const list=moods[currentMood];
-  const randomIndex=Math.floor(Math.random()*list.length);
-  getAyah(list[randomIndex]);
+ const list=moods[currentMood];
+ const r=list[Math.floor(Math.random()*list.length)];
+ getAyah(r[0],r[1]);
 }
 
-function goBack(){
-  document.getElementById("result").style.display="none";
-  document.getElementById("moods").style.display="grid";
-}
+function playAudio(){audio.play();}
+function changeReciter(){getAyah(lastSurah,lastAyah);}
+function goBack(){result.style.display="none"; moodsDiv.style.display="grid";}
 
-function playAudio(){
-  document.getElementById("audio").play();
+async function playFullSurah(){
+ const s=surahSelect.value;
+ const res=await fetch(`https://api.alquran.cloud/v1/surah/${s}/${currentReciter}`);
+ const data=await res.json();
+ let i=0;
+ function playNext(){
+   if(i>=data.data.ayahs.length) return;
+   audio.src=data.data.ayahs[i].audio;
+   typeAyah("﴿ "+data.data.ayahs[i].text+" ﴾");
+   audio.play();
+   audio.onended=()=>{i++; playNext();}
+ }
+ playNext();
 }
 </script>
 </body>
