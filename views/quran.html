@@ -41,65 +41,7 @@ h1{color:#2e7d32;}
   grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
-.channel-box{
-  margin-top:15px;
-  padding:12px;
-  border-radius:15px;
-  background:#f1f8e9;
-  box-shadow:0 0 10px rgba(0,0,0,0.1);
-  text-align:center;
-  transition:0.3s;
-}
-
-.channel-box:hover{
-  transform:scale(1.05);
-}
-
-.channel-box.show{
-  opacity:1;
-  transform: translateX(-50%) translateY(0); /* تتحرك للأعلى وتظهر */
-}
-
-.channel-box img{
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  margin-bottom:5px;
-  object-fit:cover;
-}
-
-.channel-box h3{
-  margin:5px 0;
-  color:#2e7d32;
-}
-
-.channel-box a{
-  display:inline-block;
-  margin-top:6px;
-  padding:7px 14px;
-  background:#2e7d32;
-  color:white;
-  border-radius:10px;
-  text-decoration:none;
-  transition:0.3s;
-}
-
-.channel-box{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform: translateX(-50%) translateY(50px); /* نبدأ أسفل قليلا */
-  background:white;
-  padding:10px 20px;
-  border-radius:12px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.2);
-  text-align:center;
-  opacity:0; /* نبدأ مخفية */
-  transition: all 0.8s ease;
-  z-index:10;
-}
-  
-  .moods button{
+.moods button{
   padding:12px;
   border:none;
   border-radius:12px;
@@ -177,15 +119,7 @@ h1{color:#2e7d32;}
 <button onclick="chooseMood('patience')">💪 صبر</button>
 <button onclick="chooseMood('hope')">🌟 أمل</button>
 </div>
-  
-<div class="channel-box">
-  <img src="channel.jpg" alt="نسمات القرآن">
-  <h3>🌿 نسمات القرآن</h3>
-  <a href="https://www.youtube.com/channel/UCHYJMygtSl60pThu6AUgeOw/" target="_blank">
-    🔴 اشترك في القناة
-  </a>
-</div>
-  
+
 <div class="result" id="result">
 <div class="ayah-box" id="ayahBox">
   <div id="ayah"></div>
@@ -198,6 +132,13 @@ h1{color:#2e7d32;}
 <button onclick="goBack()">🔙 رجوع</button>
 </div>
 <audio id="audio"></audio>
+<div class="channel-box">
+  <img src="./channel.jpg" alt="نسمات القرآن">
+  <h3>🌿 نسمات القرآن</h3>
+  <a href="https://www.youtube.com/channel/UCHYJMygtSl60pThu6AUgeOw/" target="_blank">
+    📺 زيارة القناة
+  </a>
+</div>
 
 </div>
 </div>
