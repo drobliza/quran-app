@@ -6,6 +6,7 @@ const db = require("./db");
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "views")));
 
 app.use(session({
   secret: "my-secret-key",
