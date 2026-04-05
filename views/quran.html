@@ -80,9 +80,19 @@ h1{color:#2e7d32;}
   transition:0.3s;
 }
 
-.channel-box a:hover{
-  background:#43a047;
+.channel-box{
+  opacity:0;
+  transform:translateY(20px);
+  animation:fadeUp 1s ease forwards;
 }
+
+@keyframes fadeUp{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+  
   .moods button{
   padding:12px;
   border:none;
