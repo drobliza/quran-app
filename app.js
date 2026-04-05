@@ -14,6 +14,28 @@ app.use(session({
   saveUninitialized: false
 }));
 
+function typeAyah(text){
+  const ayahEl = document.getElementById("ayah");
+
+  ayahEl.classList.remove("show"); // إزالة التأثير أولاً
+  ayahEl.textContent = "";
+
+  let i = 0;
+
+  const interval = setInterval(() => {
+    ayahEl.textContent += text.charAt(i);
+    i++;
+
+    if (i >= text.length) {
+      clearInterval(interval);
+
+      // 👇 هنا المكان الصحيح
+      ayahEl.classList.add("show");
+    }
+
+  }, 35);
+}
+
 function requireLogin(req, res, next) {
   if (req.session.loggedIn) next();
   else res.redirect("/");
