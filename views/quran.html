@@ -17,7 +17,10 @@ body{
   transition: background 1s;
   position: relative;
 }
-body.dim{background:linear-gradient(#0f1f14,#000);}
+
+body.dim{
+  background: radial-gradient(circle, #0f1f14, #000);
+}
 #canvas-bubbles{
   position:fixed;
   top:0; left:0;
@@ -26,29 +29,46 @@ body.dim{background:linear-gradient(#0f1f14,#000);}
   z-index:0;
 }
 .app{
-  background:white;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   width:90%;
   max-width:400px;
   padding:20px;
-  border-radius:20px;
-  box-shadow:0 0 15px rgba(0,0,0,0.1);
+  border-radius:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.15);
   text-align:center;
-  z-index:1;
 }
-h1{color:#2e7d32;}
+h1{
+  color:#1b5e20;
+  font-size:28px;
+  margin-bottom:5px;
+}
+
+h2{
+  font-size:16px;
+  color:#555;
+  margin-bottom:15px;
+}
+
 .moods{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
 .moods button{
-  padding:12px;
+  padding:14px;
   border:none;
-  border-radius:12px;
-  background:#e8f5e9;
-  font-size:16px;
+  border-radius:14px;
+  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+  font-size:15px;
   cursor:pointer;
-  transition: all 0.3s;
+  transition:0.3s;
+  font-weight:bold;
+}
+.moods button:hover{
+  transform:translateY(-3px) scale(1.05);
+  box-shadow:0 8px 15px rgba(0,0,0,0.15);
 }
 .channel-box{
   opacity:0;
@@ -102,21 +122,22 @@ h1{color:#2e7d32;}
 .result{display:none;margin-top:15px;}
 .ayah-box{
   position:relative;
-  padding:15px;
-  border-radius:16px;
-  margin-bottom:10px;
-  overflow:hidden;
-  box-shadow:0 0 8px rgba(46,125,50,0.2),0 0 20px rgba(46,125,50,0.15);
-  transition: box-shadow 0.5s;
+  padding:20px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.6);
+  backdrop-filter: blur(10px);
+  box-shadow:0 0 20px rgba(46,125,50,0.2);
 }
 #ayah{
-  font-size:24px;
-  line-height:1.9;
+  font-size:26px;
+  line-height:2.2;
   white-space: pre-wrap;
   text-align:center;
+  font-weight:bold;
   margin-bottom:5px;
   opacity:0;
-  transform: scale(0.95);
+  transform:translateY(10px);
+  transition:0.8s;
   direction: rtl;
   unicode-bidi: plaintext;
   background: linear-gradient(90deg,#1b5e20,#43a047,#1b5e20);
@@ -140,12 +161,19 @@ h1{color:#2e7d32;}
   transition: all 0.3s;
 }
 .controls button:hover{background:#43a047;}
-.ayah-box.listening{box-shadow:0 0 25px rgba(67,160,71,0.6);}
-@media (max-width:500px){
-  #ayah{font-size:20px;}
-  .moods button{font-size:14px;}
+.ayah-box.listening{
+  box-shadow:0 0 40px rgba(67,160,71,0.8);
+  transform:scale(1.02);
 }
-</style>
+@media (max-width:500px){
+  .app{
+    padding:15px;
+  }
+
+  #ayah{
+    font-size:22px;
+  }
+}</style>
 </head>
 <body>
 
@@ -204,7 +232,7 @@ class Bubble{
     this.y=Math.random()*(H-this.radius*2)+this.radius;
     this.vx=(Math.random()-0.5)*2;
     this.vy=(Math.random()-0.5)*2;
-    this.color=color || `rgba(67,160,71,${Math.random()*0.4+0.3})`;
+    this.color = color || `rgba(67,160,71,${Math.random()*0.2+0.1})`;
   }
   draw(){ 
     ctx.beginPath();
