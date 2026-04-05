@@ -41,39 +41,23 @@ h1{color:#2e7d32;}
   grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
-.moods button{
+.channel-box{
+  margin-top:15px;
   padding:12px;
-  border:none;
-  border-radius:12px;
-  background:#e8f5e9;
-  font-size:16px;
-  cursor:pointer;
-  transition: all 0.3s;
-}
-.moods button:hover{
-  background:#c8e6c9;
-  transform: scale(1.05);
+  border-radius:15px;
+  background:#f1f8e9;
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
+  text-align:center;
+  transition:0.3s;
 }
 
-/* ------------------- بطاقة القناة ------------------- */
-.channel-box{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform: translateX(-50%) translateY(50px);
-  background:white;
-  padding:12px 20px;
-  border-radius:15px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.2);
-  text-align:center;
-  opacity:0; 
-  transition: all 0.8s ease;
-  z-index:10;
+.channel-box:hover{
+  transform:scale(1.05);
 }
 
 .channel-box.show{
   opacity:1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(-50%) translateY(0); /* تتحرك للأعلى وتظهر */
 }
 
 .channel-box img{
@@ -100,11 +84,34 @@ h1{color:#2e7d32;}
   transition:0.3s;
 }
 
-.channel-box:hover{
+.channel-box{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform: translateX(-50%) translateY(50px); /* نبدأ أسفل قليلا */
+  background:white;
+  padding:10px 20px;
+  border-radius:12px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.2);
+  text-align:center;
+  opacity:0; /* نبدأ مخفية */
+  transition: all 0.8s ease;
+  z-index:10;
+}
+  
+  .moods button{
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#e8f5e9;
+  font-size:16px;
+  cursor:pointer;
+  transition: all 0.3s;
+}
+.moods button:hover{
+  background:#c8e6c9;
   transform: scale(1.05);
 }
-
-/* ------------------- عرض الآية ------------------- */
 .result{display:none;margin-top:15px;}
 .ayah-box{
   position:relative;
