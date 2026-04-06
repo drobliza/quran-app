@@ -385,11 +385,14 @@ let lastAyah=null;
 let playlist=[]; // قائمة تشغيل آيات
 let playlistIndex=0;
 
+// عدد مرات الاستماع
+let count = localStorage.getItem("count") || 0;
+
 // استعادة المزاج والآية الأخيرة
 if(localStorage.getItem('currentMood')){
-  currentMood=localStorage.getItem('currentMood');
-  lastAyah=localStorage.getItem('lastAyah');
-  chooseMood(currentMood,true);
+  currentMood = localStorage.getItem('currentMood');
+  lastAyah = localStorage.getItem('lastAyah');
+  chooseMood(currentMood, true);
 }
 
 async function getAyah(num){
