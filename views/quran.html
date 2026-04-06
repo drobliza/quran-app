@@ -56,15 +56,55 @@ h2{
   grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
-.moods button{
-  padding:14px;
+.moods button,
+.controls button{
+  padding:12px;
   border:none;
-  border-radius:14px;
-  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
-  font-size:15px;
+  border-radius:16px;
+  font-size:14px;
   cursor:pointer;
-  transition:0.3s;
   font-weight:bold;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* تأثير ضوء عند المرور */
+.moods button::before,
+.controls button::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-100%;
+  width:100%;
+  height:100%;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,0.7),transparent);
+  transition:0.5s;
+}
+
+.moods button:hover::before,
+.controls button:hover::before{
+  left:100%;
+}
+
+.moods button:hover,
+.controls button:hover{
+  transform: translateY(-4px) scale(1.05);
+}
+
+/* عند الضغط */
+.moods button:active,
+button:active{
+  animation: press 0.2s;
+}
+
+@keyframes press{
+  0%{transform:scale(1);}
+  50%{transform:scale(0.9);}
+  100%{transform:scale(1);}
 }
 .moods button:hover{
   transform:translateY(-3px) scale(1.05);
@@ -184,6 +224,7 @@ h2{
 <h2>كيف تشعر اليوم؟</h2>
 
 <div class="moods" id="moods">
+<button onclick="toggleDark()">🌙زر الوضع الليلي</button>
 <button onclick="chooseMood('sad')">😔 حزين</button>
 <button onclick="chooseMood('fear')">😟 قلق</button>
 <button onclick="chooseMood('angry')">😡 غاضب</button>
@@ -191,6 +232,11 @@ h2{
 <button onclick="chooseMood('repent')">🌱 توبة</button>
 <button onclick="chooseMood('patience')">💪 صبر</button>
 <button onclick="chooseMood('hope')">🌟 أمل</button>
+<button onclick="dailyAyah()">📅 آية اليوم</button>
+<button onclick="likeAyah()">❤️زر "أعجبني"</button>
+<button onclick="playPlaylist()">🎵 تشغيل متواصل</button>
+<button onclick="saveAyah()">⭐ حفظ</button>
+<button onclick="shareAyah()">📤 مشاركة</button>
 </div>
 
 <div class="result" id="result">
