@@ -62,7 +62,6 @@ function likeAyah(){
   alert("❤️ تم الإعجاب بالآية");
 }
 
-let count = localStorage.getItem("count") || 0;
 
 function playAudio(){
   count++;
