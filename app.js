@@ -36,48 +36,6 @@ function typeAyah(text){
   }, 35);
 }
 
-function saveAyah(){
-  const text = document.getElementById("ayah").innerText;
-  localStorage.setItem("savedAyah", text);
-  alert("تم حفظ الآية ⭐");
-}
-
-function shareAyah(){
-  const text = document.getElementById("ayah").innerText;
-  if(navigator.share){
-    navigator.share({
-      title:"آية قرآنية",
-      text:text
-    });
-  } else {
-    alert("المشاركة غير مدعومة في هذا المتصفح");
-  }
-}
-
-function toggleDark(){
-  document.body.classList.toggle("dim");
-}
-
-function likeAyah(){
-  alert("❤️ تم الإعجاب بالآية");
-}
-
-
-function playAudio(){
-  count++;
-  localStorage.setItem("count", count);
-  console.log("عدد الاستماع:", count);
-}
-
-function dailyAyah(){
-  const day = new Date().getDate();
-  const list = moods[currentMood];
-  const index = day % list.length;
-  getAyah(list[index]);
-}
-
-
-
 function requireLogin(req, res, next) {
   if (req.session.loggedIn) next();
   else res.redirect("/");
