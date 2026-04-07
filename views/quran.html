@@ -313,6 +313,21 @@ function handleCollisions(){
   }
 }
 
+function toggleDark(){
+  document.body.classList.toggle("dim");
+
+  if(document.body.classList.contains("dim")){
+    localStorage.setItem("darkMode", "on");
+  } else {
+    localStorage.setItem("darkMode", "off");
+  }
+}
+
+// عند تحميل الصفحة
+if(localStorage.getItem("darkMode") === "on"){
+  document.body.classList.add("dim");
+}
+
 function animate(){
   ctx.clearRect(0,0,W,H);
   handleCollisions();
