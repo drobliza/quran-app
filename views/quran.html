@@ -406,7 +406,7 @@ if(localStorage.getItem('currentMood')){
 }
 
 async function getAyah(num){
-  const url="https://api.alquran.cloud/v1/ayah/"+num+"/ar.alafasy";
+  const url="https://api.alquran.cloud/v1/ayah/"+num+"/ar.abdulsamad";
   const res=await fetch(url);
   const data=await res.json();
   const text=data.data.text.replace(/^\ufeff/,"");
