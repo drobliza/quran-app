@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تسجيل الدخول</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
 
@@ -17,7 +18,6 @@ body{
   overflow:hidden;
 }
 
-/* فقاعات */
 canvas{
   position:fixed;
   top:0; left:0;
@@ -53,6 +53,7 @@ input{
   border-radius:12px;
   border:1px solid #c8e6c9;
   font-size:15px;
+  box-sizing:border-box;
 }
 
 button{
@@ -64,11 +65,11 @@ button{
   color:white;
   font-size:16px;
   cursor:pointer;
+  transition:0.3s;
 }
 
 button:hover{background:#43a047;}
 
-/* رسالة الخطأ */
 .error{
   background:#ffebee;
   color:#c62828;
@@ -79,12 +80,28 @@ button:hover{background:#43a047;}
   animation: shake 0.3s;
 }
 
+.success{
+  background:#e8f5e9;
+  color:#2e7d32;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:12px;
+  display:none;
+}
+
 @keyframes shake{
   0%{transform:translateX(0);}
   25%{transform:translateX(5px);}
   50%{transform:translateX(-5px);}
   75%{transform:translateX(5px);}
   100%{transform:translateX(0);}
+}
+
+a{
+  display:block;
+  margin-top:15px;
+  color:#2e7d32;
+  text-decoration:none;
 }
 </style>
 </head>
@@ -98,22 +115,28 @@ button:hover{background:#43a047;}
   <p>سجّل دخولك للوصول إلى القرآن حسب حالتك</p>
 
   <div class="error" id="errorBox">❌ اسم المستخدم أو كلمة المرور غير صحيحة</div>
+  <div class="success" id="successBox">✅ تم إنشاء الحساب بنجاح</div>
 
   <form method="POST" action="/login">
     <input type="text" name="username" placeholder="اسم المستخدم" required>
     <input type="password" name="password" placeholder="كلمة المرور" required>
     <button type="submit">تسجيل الدخول</button>
   </form>
+
+  <a href="/register">إنشاء حساب جديد</a>
 </div>
 
 <script>
-// إظهار رسالة الخطأ إن وُجد ?error=1
 const params = new URLSearchParams(window.location.search);
+
 if(params.get("error")){
   document.getElementById("errorBox").style.display="block";
 }
 
-// فقاعات خلفية
+if(params.get("registered")){
+  document.getElementById("successBox").style.display="block";
+}
+
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
 let W = canvas.width = window.innerWidth;
@@ -148,4 +171,3 @@ animate();
 
 </body>
 </html>
-
