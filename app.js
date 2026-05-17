@@ -14,28 +14,6 @@ app.use(session({
   saveUninitialized: false
 }));
 
-function typeAyah(text){
-  const ayahEl = document.getElementById("ayah");
-
-  ayahEl.classList.remove("show"); // إزالة التأثير أولاً
-  ayahEl.textContent = "";
-
-  let i = 0;
-
-  const interval = setInterval(() => {
-    ayahEl.textContent += text.charAt(i);
-    i++;
-
-    if (i >= text.length) {
-      clearInterval(interval);
-
-      // 👇 هنا المكان الصحيح
-      ayahEl.classList.add("show");
-    }
-
-  }, 35);
-}
-
 function requireLogin(req, res, next) {
   if (req.session.loggedIn) next();
   else res.redirect("/");
@@ -43,6 +21,32 @@ function requireLogin(req, res, next) {
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "views/login.html"));
+});
+
+app.get("/register", (req, res) => {
+  res.sendFile(path.join(__dirname, "views/register.html"));
+});
+
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.redirect("/register?error=1");
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  db.run(
+    "INSERT INTO users (username, password) VALUES (?, ?)",
+    [username, hashedPassword],
+    function (err) {
+      if (err) {
+        return res.redirect("/register?exists=1");
+      }
+
+      res.redirect("/?registered=1");
+    }
+  );
 });
 
 app.post("/login", (req, res) => {
@@ -78,4 +82,3 @@ app.get("/logout", (req, res) => {
 app.listen(3000, () => {
   console.log("Server running on http://localhost:3000");
 });
-
