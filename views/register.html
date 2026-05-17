@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إنشاء حساب</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:"Amiri", serif;
+  background:linear-gradient(#e8f5e9,#ffffff);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  overflow:hidden;
+}
+
+canvas{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+}
+
+.register-box{
+  background:white;
+  padding:30px 25px;
+  border-radius:20px;
+  width:90%;
+  max-width:350px;
+  box-shadow:0 0 20px rgba(46,125,50,0.2);
+  text-align:center;
+  z-index:1;
+}
+
+.register-box h1{
+  color:#2e7d32;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin-bottom:12px;
+  border-radius:12px;
+  border:1px solid #c8e6c9;
+  font-size:15px;
+  box-sizing:border-box;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#2e7d32;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#43a047;
+}
+
+.message{
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:12px;
+}
+
+.error{
+  background:#ffebee;
+  color:#c62828;
+}
+
+.success{
+  background:#e8f5e9;
+  color:#2e7d32;
+}
+
+a{
+  display:block;
+  margin-top:15px;
+  color:#2e7d32;
+  text-decoration:none;
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="register-box">
+  <h1>✨ إنشاء حساب</h1>
+
+  <div class="message error" id="errorBox" style="display:none;">
+    ❌ اسم المستخدم مستخدم بالفعل
+  </div>
+
+  <form method="POST" action="/register">
+    <input type="text" name="username" placeholder="اسم المستخدم" required>
+    <input type="password" name="password" placeholder="كلمة المرور" required>
+    <button type="submit">إنشاء الحساب</button>
+  </form>
+
+  <a href="/">لديك حساب بالفعل؟ تسجيل الدخول</a>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+
+if(params.get("exists")){
+  document.getElementById("errorBox").style.display="block";
+}
+
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+let W = canvas.width = window.innerWidth;
+let H = canvas.height = window.innerHeight;
+
+window.onresize = () => {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+};
+
+let bubbles = [];
+
+for(let i=0;i<40;i++){
+  bubbles.push({
+    x:Math.random()*W,
+    y:Math.random()*H,
+    r:Math.random()*8+3,
+    v:Math.random()*0.5+0.2
+  });
+}
+
+function animate(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle = "rgba(46,125,50,0.2)";
+
+  for(let b of bubbles){
+    ctx.beginPath();
+    ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+    ctx.fill();
+
+    b.y -= b.v;
+
+    if(b.y < 0){
+      b.y = H;
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
+</html>
