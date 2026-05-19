@@ -5,26 +5,224 @@
 <title>القرآن حسب حالتك - فقاعات</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
 <style>
-body{margin:0;font-family:"Amiri","Scheherazade New","Cairo",serif;background:linear-gradient(#f2fff7,#ffffff);display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden;transition: background 1s;position: relative;}
-body.dim{background: radial-gradient(circle, #0f1f14, #000);}
-#canvas-bubbles{position:fixed;top:0; left:0;width:100%;height:100%;z-index:0;}
-.app{background: rgba(255,255,255,0.7);backdrop-filter: blur(15px);-webkit-backdrop-filter: blur(15px);width:90%;max-width:400px;padding:20px;border-radius:25px;box-shadow:0 10px 30px rgba(0,0,0,0.15);text-align:center;}
-h1{color:#1b5e20;font-size:28px;margin-bottom:5px;}
-h2{font-size:16px;color:#555;margin-bottom:15px;}
-.moods{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
-.moods button,.controls button{padding:12px;border:none;border-radius:16px;font-size:14px;cursor:pointer;font-weight:bold;background: rgba(255,255,255,0.6);backdrop-filter: blur(10px);box-shadow: 0 4px 15px rgba(0,0,0,0.1);transition: all 0.25s ease;position: relative;overflow: hidden;}
+body{
+  margin:0;
+  font-family:"Amiri","Scheherazade New","Cairo",serif;
+  background:linear-gradient(#f2fff7,#ffffff);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  overflow:hidden;
+  transition: background 1s;
+  position: relative;
+}
+
+body.dim{
+  background: radial-gradient(circle, #0f1f14, #000);
+}
+#canvas-bubbles{
+  position:fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+}
+.app{
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  width:90%;
+  max-width:400px;
+  padding:20px;
+  border-radius:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.15);
+  text-align:center;
+}
+h1{
+  color:#1b5e20;
+  font-size:28px;
+  margin-bottom:5px;
+}
+
+h2{
+  font-size:16px;
+  color:#555;
+  margin-bottom:15px;
+}
+
+.moods{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.moods button,
+.controls button{
+  padding:12px;
+  border:none;
+  border-radius:16px;
+  font-size:14px;
+  cursor:pointer;
+  font-weight:bold;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* تأثير ضوء عند المرور */
+.moods button::before,
+.controls button::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-100%;
+  width:100%;
+  height:100%;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,0.7),transparent);
+  transition:0.5s;
+}
+
+.moods button:hover::before,
+.controls button:hover::before{
+  left:100%;
+}
+
+.moods button:hover,
+.controls button:hover{
+  transform: translateY(-4px) scale(1.05);
+}
+
+/* عند الضغط */
+.moods button:active,
+button:active{
+  animation: press 0.2s;
+}
+
+@keyframes press{
+  0%{transform:scale(1);}
+  50%{transform:scale(0.9);}
+  100%{transform:scale(1);}
+}
+.moods button:hover{
+  transform:translateY(-3px) scale(1.05);
+  box-shadow:0 8px 15px rgba(0,0,0,0.15);
+}
+.channel-box{
+  opacity:0;
+  transform:translateY(20px);
+  animation:fadeUp 1s ease forwards;
+}
+
+@keyframes fadeUp{
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.channel-box:hover{
+  transform:scale(1.05);
+}
+
+.channel-box img{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  object-fit:cover;
+  margin-bottom:8px;
+  border:2px solid #2e7d32;
+}
+
+.channel-box h3{
+  margin:5px 0;
+  color:#2e7d32;
+}
+
+.channel-box a{
+  display:inline-block;
+  margin-top:6px;
+  padding:7px 14px;
+  background:#2e7d32;
+  color:white;
+  border-radius:10px;
+  text-decoration:none;
+  transition:0.3s;
+}
+
+.channel-box a:hover{
+  background:#43a047;
+}
+.moods button:hover{
+  background:#c8e6c9;
+  transform: scale(1.05);
+}
 .result{display:none;margin-top:15px;}
-.ayah-box{position:relative;padding:20px;border-radius:20px;background:rgba(255,255,255,0.6);backdrop-filter: blur(10px);box-shadow:0 0 20px rgba(46,125,50,0.2);}
-#ayah{font-size:26px;line-height:2.2;white-space: pre-wrap;text-align:center;font-weight:bold;margin-bottom:5px;direction: rtl;unicode-bidi: plaintext;}
-.controls button{margin:5px;padding:8px 12px;border:none;border-radius:10px;background:#2e7d32;color:white;cursor:pointer;transition: all 0.3s;}
+.ayah-box{
+  position:relative;
+  padding:20px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.6);
+  backdrop-filter: blur(10px);
+  box-shadow:0 0 20px rgba(46,125,50,0.2);
+}
+#ayah{
+  font-size:26px;
+  line-height:2.2;
+  white-space: pre-wrap;
+  text-align:center;
+  font-weight:bold;
+  margin-bottom:5px;
+  opacity:0;
+  transform:translateY(10px);
+  transition:0.8s;
+  direction: rtl;
+  unicode-bidi: plaintext;
+  background: linear-gradient(90deg,#1b5e20,#43a047,#1b5e20);
+  background-size:200% 200%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation: gradientMove 6s ease infinite, appear 1.2s ease forwards;
+}
+@keyframes appear{to{opacity:1; transform: scale(1);}}
+@keyframes gradientMove{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+#ayah.fade{opacity:0; transform:scale(0.95); transition:opacity .5s, transform 0.5s;}
+.meaning,.action{font-size:14px;margin-bottom:8px;}
+.controls button{
+  margin:5px;
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:#2e7d32;
+  color:white;
+  cursor:pointer;
+  transition: all 0.3s;
+}
 .controls button:hover{background:#43a047;}
-</style>
+.ayah-box.listening{
+  box-shadow:0 0 40px rgba(67,160,71,0.8);
+  transform:scale(1.02);
+}
+@media (max-width:500px){
+  .app{
+    padding:15px;
+  }
+
+  #ayah{
+    font-size:22px;
+  }
+}</style>
 </head>
 <body>
+
 <canvas id="canvas-bubbles"></canvas>
+
 <div class="app">
 <h1>📖 القرآن لك</h1>
 <h2>كيف تشعر اليوم؟</h2>
+
 <div class="moods" id="moods">
 <button onclick="toggleDark()">🌙زر الوضع الليلي</button>
 <button onclick="chooseMood('sad')">😔 حزين</button>
@@ -35,58 +233,272 @@ h2{font-size:16px;color:#555;margin-bottom:15px;}
 <button onclick="chooseMood('patience')">💪 صبر</button>
 <button onclick="chooseMood('hope')">🌟 أمل</button>
 </div>
+
 <div class="result" id="result">
-<div class="ayah-box" id="ayahBox"><div id="ayah"></div></div>
+<div class="ayah-box" id="ayahBox">
+  <div id="ayah"></div>
+</div>
 <div class="meaning" id="meaning"></div>
 <div class="action" id="action"></div>
 <div class="controls">
 <button onclick="newAyah()">🔄 آية أخرى</button>
 <button onclick="playAudio()">🎧 استماع</button>
-<button onclick="playFullSurah()">🎵 السورة كاملة</button>
 <button onclick="goBack()">🔙 رجوع</button>
 </div>
 <audio id="audio"></audio>
+<div class="channel-box">
+  <img src="./channel.jpg" alt="نسمات القرآن">
+  <h3>🌿 نسمات القرآن</h3>
+  <a href="https://www.youtube.com/channel/UCHYJMygtSl60pThu6AUgeOw/" target="_blank">
+    📺 زيارة القناة
+  </a>
+</div>
+
 </div>
 </div>
+
 <script>
-const moods={sad:[2,286,153],fear:[3,173,40],angry:[5,134,37],dua:[1,60,186],repent:[53,222,8],patience:[155,200,10],hope:[13,19,24]};
+// ------------------- فقاعات -------------------
+const canvas = document.getElementById('canvas-bubbles');
+const ctx = canvas.getContext('2d');
+let W = canvas.width = window.innerWidth;
+let H = canvas.height = window.innerHeight;
+
+window.addEventListener('resize',()=>{ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; });
+
+class Bubble{
+  constructor(color){
+    this.radius=Math.random()*20+10;
+    this.x=Math.random()*(W-this.radius*2)+this.radius;
+    this.y=Math.random()*(H-this.radius*2)+this.radius;
+    this.vx=(Math.random()-0.5)*2;
+    this.vy=(Math.random()-0.5)*2;
+    this.color = color || `rgba(67,160,71,${Math.random()*0.2+0.1})`;
+  }
+  draw(){ 
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+    ctx.fillStyle=this.color;
+    ctx.fill();
+  }
+  update(){
+    this.x+=this.vx;
+    this.y+=this.vy;
+    if(this.x+this.radius>W||this.x-this.radius<0) this.vx*=-1;
+    if(this.y+this.radius>H||this.y-this.radius<0) this.vy*=-1;
+  }
+}
+
+let bubbles=[];
+for(let i=0;i<50;i++) bubbles.push(new Bubble());
+
+// تصادم فقاعات بسيط
+function handleCollisions(){
+  for(let i=0;i<bubbles.length;i++){
+    for(let j=i+1;j<bubbles.length;j++){
+      const dx=bubbles[j].x-bubbles[i].x;
+      const dy=bubbles[j].y-bubbles[i].y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const minDist=bubbles[i].radius+bubbles[j].radius;
+      if(dist<minDist){
+        const angle=Math.atan2(dy,dx);
+        const targetX=bubbles[i].x+Math.cos(angle)*minDist;
+        const targetY=bubbles[i].y+Math.sin(angle)*minDist;
+        const ax=(targetX-bubbles[j].x)*0.05;
+        const ay=(targetY-bubbles[j].y)*0.05;
+        bubbles[i].vx-=ax; bubbles[i].vy-=ay;
+        bubbles[j].vx+=ax; bubbles[j].vy+=ay;
+      }
+    }
+  }
+}
+
+function toggleDark(){
+  document.body.classList.toggle("dim");
+
+  if(document.body.classList.contains("dim")){
+    localStorage.setItem("darkMode", "on");
+  } else {
+    localStorage.setItem("darkMode", "off");
+  }
+}
+
+// عند تحميل الصفحة
+if(localStorage.getItem("darkMode") === "on"){
+  document.body.classList.add("dim");
+}
+
+function animate(){
+  ctx.clearRect(0,0,W,H);
+  handleCollisions();
+  for(let b of bubbles){ b.update(); b.draw(); }
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ------------------- القرآن -------------------
+const moods = {
+  sad:[
+    2,286,153,87,255,18,39,42,
+    28,10,94,5,5,65,7,156,3,139,
+    9,51,57,22,12,86
+  ],
+
+  fear:[
+    3,173,40,129,45,9,
+    65,3,8,2,38,33,3,160,
+    6,17,10,107
+  ],
+
+  angry:[
+    5,134,37,200,16,60,
+    42,43,3,134,7,199,
+    25,63,41,34
+  ],
+
+  dua:[
+    1,60,186,55,100,101,
+    2,201,3,8,7,23,23,118,
+    25,74,28,24,40,44
+  ],
+
+  repent:[
+    53,222,8,110,25,32,50,
+    66,8,39,53,11,90,
+    24,31,20,82
+  ],
+
+  patience:[
+    155,200,10,94,110,
+    2,153,3,200,16,127,
+    39,10,11,115,14,42
+  ],
+
+  hope:[
+    13,19,24,37,57,90,
+    39,53,94,5,65,7,
+    12,87,41,30,2,216
+  ]
+};
+const moodColors = {
+  sad:'rgba(30,144,255,0.5)',
+  fear:'rgba(255,140,0,0.5)',
+  angry:'rgba(255,0,0,0.5)',
+  dua:'rgba(255,215,0,0.5)',
+  repent:'rgba(0,128,0,0.5)',
+  patience:'rgba(128,0,128,0.5)',
+  hope:'rgba(255,105,180,0.5)'
+};
+
 let currentMood="";
-let currentSurah=1;
 let lastAyah=null;
-function toggleDark(){document.body.classList.toggle("dim");}
+let playlist=[]; // قائمة تشغيل آيات
+let playlistIndex=0;
+
+// عدد مرات الاستماع
+let count = localStorage.getItem("count") || 0;
+
+// استعادة المزاج والآية الأخيرة
+if(localStorage.getItem('currentMood')){
+  currentMood = localStorage.getItem('currentMood');
+  lastAyah = localStorage.getItem('lastAyah');
+  chooseMood(currentMood, true);
+}
+
 async function getAyah(num){
-const url="https://api.alquran.cloud/v1/ayah/"+num+"/ar.abdulsamad";
-const res=await fetch(url);
-const data=await res.json();
-const text=data.data.text.replace(/^\ufeff/,"");
-document.getElementById("ayah").innerText="﴿ "+text+" ﴾";
-document.getElementById("meaning").innerText="📖 "+data.data.surah.name+" - آية "+data.data.numberInSurah;
-document.getElementById("action").innerText="🎯 استمع وتدبّر هذه الآية";
-document.getElementById("audio").src=data.data.audio;
-currentSurah=data.data.surah.number;
-lastAyah=num;
+  const url="https://api.alquran.cloud/v1/ayah/"+num+"/ar.abdulsamad";
+  const res=await fetch(url);
+  const data=await res.json();
+  const text=data.data.text.replace(/^\ufeff/,"");
+  typeAyah("﴿ "+text+" ﴾");
+  document.getElementById("meaning").innerText="📖 "+data.data.surah.name+" - آية "+data.data.numberInSurah;
+  document.getElementById("action").innerText="🎯 استمع وتدبّر هذه الآية";
+  document.getElementById("audio").src=data.data.audio;
+  lastAyah=num;
+  localStorage.setItem('lastAyah',num);
 }
-function chooseMood(mood,skipRandom=false){currentMood=mood;document.getElementById("moods").style.display="none";document.getElementById("result").style.display="block";newAyah();}
-function newAyah(){const list=moods[currentMood];const randomIndex=Math.floor(Math.random()*list.length);getAyah(list[randomIndex]);}
-function goBack(){currentMood="";document.getElementById("result").style.display="none";document.getElementById("moods").style.display="grid";}
-function playAudio(){const audio=document.getElementById("audio");audio.play();}
-async function playFullSurah(){
-const audio=document.getElementById("audio");
-const res=await fetch("https://api.alquran.cloud/v1/surah/"+currentSurah+"/ar.abdulsamad");
-const data=await res.json();
-if(data.data.audio){
-audio.src=data.data.audio;
-audio.play();
-}else if(data.data.ayahs && data.data.ayahs.length>0){
-let index=0;
-function playNext(){
-if(index>=data.data.ayahs.length) return;
-audio.src=data.data.ayahs[index].audio;
-audio.play();
-audio.onended=()=>{index++;playNext();};
+
+function typeAyah(text){
+  const ayahEl=document.getElementById("ayah");
+  ayahEl.textContent="";
+  ayahEl.style.animation="none";
+  void ayahEl.offsetWidth;
+  ayahEl.style.animation=null;
+  let i=0;
+  const interval=setInterval(()=>{
+    ayahEl.textContent+=text.charAt(i);
+    i++;
+    if(i>=text.length) clearInterval(interval);
+  },35);
 }
-playNext();
+
+function chooseMood(mood,skipRandom=false){
+  currentMood=mood;
+  localStorage.setItem('currentMood',mood);
+  document.getElementById("moods").style.display="none";
+  document.getElementById("result").style.display="block";
+  // تغيير لون الفقاعات
+  bubbles=[];
+  for(let i=0;i<50;i++) bubbles.push(new Bubble(moodColors[mood]));
+  if(skipRandom && lastAyah){ getAyah(lastAyah); }
+  else newAyah();
 }
+
+function newAyah(){
+  const ayahEl=document.getElementById("ayah");
+  ayahEl.classList.add("fade");
+  setTimeout(()=>{
+    const list=moods[currentMood];
+    const randomIndex=Math.floor(Math.random()*list.length);
+    getAyah(list[randomIndex]);
+    ayahEl.classList.remove("fade");
+  },500);
+}
+
+function goBack(){
+  currentMood = "";
+  localStorage.removeItem('currentMood');
+  localStorage.removeItem('lastAyah');
+  document.getElementById("result").style.display = "none";
+  document.getElementById("moods").style.display = "grid";
+  bubbles=[];
+  for(let i=0;i<50;i++) bubbles.push(new Bubble('rgba(67,160,71,0.3)'));
+}
+
+// -------- قائمة تشغيل آيات ----------
+function playPlaylist(){
+  playlist = moods[currentMood];
+  playlistIndex = 0;
+  playNextInPlaylist();
+}
+
+function playNextInPlaylist(){
+  if(playlistIndex >= playlist.length) return;
+  getAyah(playlist[playlistIndex]);
+  const audio = document.getElementById("audio");
+  const box = document.getElementById("ayahBox");
+  box.classList.add("listening");
+  document.body.classList.add("dim");
+  audio.play();
+  audio.onended = ()=>{
+    box.classList.remove("listening");
+    document.body.classList.remove("dim");
+    playlistIndex++;
+    playNextInPlaylist();
+  };
+}
+
+// --------- تشغيل آية واحدة ---------
+function playAudio(){
+  const audio=document.getElementById("audio");
+  const box=document.getElementById("ayahBox");
+  box.classList.add("listening");
+  document.body.classList.add("dim");
+  audio.play();
+  audio.onended=()=>{
+    box.classList.remove("listening");
+    document.body.classList.remove("dim");
+  }
 }
 </script>
 </body>
