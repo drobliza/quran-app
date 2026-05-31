@@ -1,60 +1,550 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<title>القرآن حسب حالتك - فقاعات</title>
-<link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
-<style>
-body{
-  margin:0;
-  font-family:"Amiri","Scheherazade New","Cairo",serif;
-  background:linear-gradient(#f2fff7,#ffffff);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  overflow:hidden;
-  transition: background 1s;
-  position: relative;
+"use client";
+import { useState, useEffect, useRef, useCallback } from "react";
+
+const moods = {
+  sad: [2, 286, 153],
+  fear: [3, 173, 40],
+  angry: [5, 134, 37],
+  dua: [1, 60, 186],
+  repent: [53, 222, 8],
+  patience: [155, 200, 10],
+  hope: [13, 19, 24],
+};
+
+const moodColors = {
+  sad: "rgba(30,144,255,0.5)",
+  fear: "rgba(255,140,0,0.5)",
+  angry: "rgba(255,0,0,0.5)",
+  dua: "rgba(255,215,0,0.5)",
+  repent: "rgba(0,128,0,0.5)",
+  patience: "rgba(128,0,128,0.5)",
+  hope: "rgba(255,105,180,0.5)",
+};
+
+const moodButtons = [
+  { id: "sad", label: "😔 حزين" },
+  { id: "fear", label: "😟 قلق" },
+  { id: "angry", label: "😡 غاضب" },
+  { id: "dua", label: "🙏 دعاء" },
+  { id: "repent", label: "🌱 توبة" },
+  { id: "patience", label: "💪 صبر" },
+  { id: "hope", label: "🌟 أمل" },
+];
+
+class Bubble {
+  constructor(color, W, H) {
+    this.radius = Math.random() * 20 + 10;
+    this.x = Math.random() * (W - this.radius * 2) + this.radius;
+    this.y = Math.random() * (H - this.radius * 2) + this.radius;
+    this.vx = (Math.random() - 0.5) * 2;
+    this.vy = (Math.random() - 0.5) * 2;
+    this.color = color || `rgba(67,160,71,${Math.random() * 0.2 + 0.1})`;
+    this.W = W;
+    this.H = H;
+  }
+  draw(ctx) {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x + this.radius > this.W || this.x - this.radius < 0)
+      this.vx *= -1;
+    if (this.y + this.radius > this.H || this.y - this.radius < 0)
+      this.vy *= -1;
+  }
 }
-body.dim{background: radial-gradient(circle, #0f1f14, #000);}#canvas-bubbles{position:fixed;top:0; left:0;width:100%;height:100%;z-index:0;}.app{background: rgba(255,255,255,0.7);backdrop-filter: blur(15px);-webkit-backdrop-filter: blur(15px);width:90%;max-width:400px;padding:20px;border-radius:25px;box-shadow:0 10px 30px rgba(0,0,0,0.15);text-align:center;}h1{color:#1b5e20;font-size:28px;margin-bottom:5px;}h2{font-size:16px;color:#555;margin-bottom:15px;}.moods{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}.moods button,.controls button{padding:12px;border:none;border-radius:16px;font-size:14px;cursor:pointer;font-weight:bold;background: rgba(255,255,255,0.6);backdrop-filter: blur(10px);box-shadow: 0 4px 15px rgba(0,0,0,0.1);transition: all 0.25s ease;position: relative;overflow: hidden;}.moods button::before,.controls button::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,0.7),transparent);transition:0.5s;}.moods button:hover::before,.controls button:hover::before{left:100%;}.moods button:hover,.controls button:hover{transform: translateY(-4px) scale(1.05);}button:active{animation: press 0.2s;}@keyframes press{0%{transform:scale(1);}50%{transform:scale(0.9);}100%{transform:scale(1);}}.channel-box{opacity:0;transform:translateY(20px);animation:fadeUp 1s ease forwards;}@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}.channel-box img{width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:8px;border:2px solid #2e7d32;}.channel-box h3{margin:5px 0;color:#2e7d32;}.channel-box a{display:inline-block;margin-top:6px;padding:7px 14px;background:#2e7d32;color:white;border-radius:10px;text-decoration:none;transition:0.3s;}.channel-box a:hover{background:#43a047;}.result{display:none;margin-top:15px;}.ayah-box{position:relative;padding:20px;border-radius:20px;background:rgba(255,255,255,0.6);backdrop-filter: blur(10px);box-shadow:0 0 20px rgba(46,125,50,0.2);}#ayah{font-size:26px;line-height:2.2;white-space: pre-wrap;text-align:center;font-weight:bold;margin-bottom:5px;opacity:0;transform:translateY(10px);transition:0.8s;direction: rtl;unicode-bidi: plaintext;background: linear-gradient(90deg,#1b5e20,#43a047,#1b5e20);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation: gradientMove 6s ease infinite, appear 1.2s ease forwards;}@keyframes appear{to{opacity:1; transform: scale(1);}}@keyframes gradientMove{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}#ayah.fade{opacity:0; transform:scale(0.95); transition:opacity .5s, transform 0.5s;}.meaning,.action,.apk-info{font-size:14px;margin-bottom:8px;word-break:break-word;}.controls button{margin:5px;padding:8px 12px;border:none;border-radius:10px;background:#2e7d32;color:white;cursor:pointer;transition: all 0.3s;}.controls button:hover{background:#43a047;}.ayah-box.listening{box-shadow:0 0 40px rgba(67,160,71,0.8);transform:scale(1.02);}
-</style>
-</head>
-<body>
-<canvas id="canvas-bubbles"></canvas>
-<div class="app">
-<h1>📖 القرآن لك</h1>
-<h2>كيف تشعر اليوم؟</h2>
-<div class="moods" id="moods">
-<button onclick="toggleDark()">🌙زر الوضع الليلي</button>
-<button onclick="chooseMood('sad')">😔 حزين</button>
-<button onclick="chooseMood('fear')">😟 قلق</button>
-<button onclick="chooseMood('angry')">😡 غاضب</button>
-<button onclick="chooseMood('dua')">🙏 دعاء</button>
-<button onclick="chooseMood('repent')">🌱 توبة</button>
-<button onclick="chooseMood('patience')">💪 صبر</button>
-<button onclick="chooseMood('hope')">🌟 أمل</button>
-</div>
-<div class="result" id="result">
-<div class="ayah-box" id="ayahBox"><div id="ayah"></div></div>
-<div class="meaning" id="meaning"></div>
-<div class="action" id="action"></div>
-<div class="controls">
-<button onclick="newAyah()">🔄 آية أخرى</button>
-<button onclick="playAudio()">🎧 استماع</button>
-<button onclick="playFullSurah()">☺️ السورة كاملة</button>
-<button onclick="goBack()">🔙 رجوع</button>
-<a href="https://github.com/drobliza/quran-app/releases/download/v1.0/app-debug.apk" target="_blank"><button>⬇ تحميل التطبيق</button></a>
-</div>
-<audio id="audio"></audio>
-<div class="channel-box"><img src="./channel.jpg" alt="نسمات القرآن"><h3>🌿 نسمات القرآن</h3><a href="https://www.youtube.com/channel/UCHYJMygtSl60pThu6AUgeOw/" target="_blank">📺 زيارة القناة</a></div>
-</div></div>
-<script>
-const canvas=document.getElementById('canvas-bubbles');const ctx=canvas.getContext('2d');let W=canvas.width=window.innerWidth;let H=canvas.height=window.innerHeight;window.addEventListener('resize',()=>{W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;});class Bubble{constructor(color){this.radius=Math.random()*20+10;this.x=Math.random()*(W-this.radius*2)+this.radius;this.y=Math.random()*(H-this.radius*2)+this.radius;this.vx=(Math.random()-0.5)*2;this.vy=(Math.random()-0.5)*2;this.color=color||`rgba(67,160,71,${Math.random()*0.2+0.1})`;}draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);ctx.fillStyle=this.color;ctx.fill();}update(){this.x+=this.vx;this.y+=this.vy;if(this.x+this.radius>W||this.x-this.radius<0)this.vx*=-1;if(this.y+this.radius>H||this.y-this.radius<0)this.vy*=-1;}}let bubbles=[];for(let i=0;i<50;i++)bubbles.push(new Bubble());function handleCollisions(){for(let i=0;i<bubbles.length;i++){for(let j=i+1;j<bubbles.length;j++){const dx=bubbles[j].x-bubbles[i].x;const dy=bubbles[j].y-bubbles[i].y;const dist=Math.sqrt(dx*dx+dy*dy);const minDist=bubbles[i].radius+bubbles[j].radius;if(dist<minDist){const angle=Math.atan2(dy,dx);const targetX=bubbles[i].x+Math.cos(angle)*minDist;const targetY=bubbles[i].y+Math.sin(angle)*minDist;const ax=(targetX-bubbles[j].x)*0.05;const ay=(targetY-bubbles[j].y)*0.05;bubbles[i].vx-=ax;bubbles[i].vy-=ay;bubbles[j].vx+=ax;bubbles[j].vy+=ay;}}}}function toggleDark(){document.body.classList.toggle("dim");}function animate(){ctx.clearRect(0,0,W,H);handleCollisions();for(let b of bubbles){b.update();b.draw();}requestAnimationFrame(animate);}animate();
-const moods={sad:[2,286,153],fear:[3,173,40],angry:[5,134,37],dua:[1,60,186],repent:[53,222,8],patience:[155,200,10],hope:[13,19,24]};const moodColors={sad:'rgba(30,144,255,0.5)',fear:'rgba(255,140,0,0.5)',angry:'rgba(255,0,0,0.5)',dua:'rgba(255,215,0,0.5)',repent:'rgba(0,128,0,0.5)',patience:'rgba(128,0,128,0.5)',hope:'rgba(255,105,180,0.5)'};let currentMood="";let lastAyah=null;let currentSurah=1;
-async function getAyah(num){const url="https://api.alquran.cloud/v1/ayah/"+num+"/ar.abdulsamad";const res=await fetch(url);const data=await res.json();const text=data.data.text.replace(/^\ufeff/,"");typeAyah("﴿ "+text+" ﴾");document.getElementById("meaning").innerText="📖 "+data.data.surah.name+" - آية "+data.data.numberInSurah;document.getElementById("action").innerText="🎯 استمع وتدبّر هذه الآية";document.getElementById("audio").src=data.data.audio;currentSurah=data.data.surah.number;lastAyah=num;}
-function typeAyah(text){const ayahEl=document.getElementById("ayah");ayahEl.textContent="";let i=0;const interval=setInterval(()=>{ayahEl.textContent+=text.charAt(i);i++;if(i>=text.length)clearInterval(interval);},35);}function chooseMood(mood){currentMood=mood;document.getElementById("moods").style.display="none";document.getElementById("result").style.display="block";bubbles=[];for(let i=0;i<50;i++)bubbles.push(new Bubble(moodColors[mood]));newAyah();}function newAyah(){const list=moods[currentMood];const randomIndex=Math.floor(Math.random()*list.length);getAyah(list[randomIndex]);}function goBack(){currentMood="";document.getElementById("result").style.display="none";document.getElementById("moods").style.display="grid";}function playAudio(){const audio=document.getElementById("audio");audio.play();}
-async function playFullSurah(){const audio=document.getElementById("audio");const res=await fetch("https://api.alquran.cloud/v1/surah/"+currentSurah+"/ar.abdulsamad");const data=await res.json();if(data.data.audio){audio.src=data.data.audio;audio.play();}else if(data.data.ayahs){let index=0;function playNext(){if(index>=data.data.ayahs.length)return;audio.src=data.data.ayahs[index].audio;audio.play();audio.onended=()=>{index++;playNext();};}playNext();}}
-</script>
-</body>
-</html>
+
+export default function QuranApp() {
+  const canvasRef = useRef(null);
+  const bubblesRef = useRef([]);
+  const animFrameRef = useRef(null);
+  const audioRef = useRef(null);
+  const typeIntervalRef = useRef(null);
+
+  const [dark, setDark] = useState(false);
+  const [currentMood, setCurrentMood] = useState("");
+  const [ayahText, setAyahText] = useState("");
+  const [meaning, setMeaning] = useState("");
+  const [audioSrc, setAudioSrc] = useState("");
+  const [currentSurah, setCurrentSurah] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+
+  const initBubbles = useCallback((color) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const W = canvas.width;
+    const H = canvas.height;
+    bubblesRef.current = Array.from(
+      { length: 50 },
+      () => new Bubble(color, W, H),
+    );
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      bubblesRef.current.forEach((b) => {
+        b.W = canvas.width;
+        b.H = canvas.height;
+      });
+    };
+    resize();
+    window.addEventListener("resize", resize);
+    initBubbles(null);
+
+    const handleCollisions = () => {
+      const bs = bubblesRef.current;
+      for (let i = 0; i < bs.length; i++) {
+        for (let j = i + 1; j < bs.length; j++) {
+          const dx = bs[j].x - bs[i].x;
+          const dy = bs[j].y - bs[i].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const minDist = bs[i].radius + bs[j].radius;
+          if (dist < minDist) {
+            const angle = Math.atan2(dy, dx);
+            const targetX = bs[i].x + Math.cos(angle) * minDist;
+            const targetY = bs[i].y + Math.sin(angle) * minDist;
+            const ax = (targetX - bs[j].x) * 0.05;
+            const ay = (targetY - bs[j].y) * 0.05;
+            bs[i].vx -= ax;
+            bs[i].vy -= ay;
+            bs[j].vx += ax;
+            bs[j].vy += ay;
+          }
+        }
+      }
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      handleCollisions();
+      bubblesRef.current.forEach((b) => {
+        b.update();
+        b.draw(ctx);
+      });
+      animFrameRef.current = requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", resize);
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [initBubbles]);
+
+  const typeAyah = (text) => {
+    if (typeIntervalRef.current) clearInterval(typeIntervalRef.current);
+    setAyahText("");
+    let i = 0;
+    typeIntervalRef.current = setInterval(() => {
+      setAyahText((prev) => prev + text.charAt(i));
+      i++;
+      if (i >= text.length) clearInterval(typeIntervalRef.current);
+    }, 35);
+  };
+
+  const getAyah = useCallback(async (num) => {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `https://api.alquran.cloud/v1/ayah/${num}/ar.abdulsamad`,
+      );
+      if (!res.ok) throw new Error("فشل جلب الآية");
+      const data = await res.json();
+      const text = data.data.text.replace(/^\ufeff/, "");
+      typeAyah(`﴿ ${text} ﴾`);
+      setMeaning(`📖 ${data.data.surah.name} - آية ${data.data.numberInSurah}`);
+      setAudioSrc(data.data.audio);
+      setCurrentSurah(data.data.surah.number);
+    } catch (e) {
+      setAyahText("حدث خطأ، يرجى المحاولة مرة أخرى.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const chooseMood = (mood) => {
+    setCurrentMood(mood);
+    setShowResult(true);
+    initBubbles(moodColors[mood]);
+    const list = moods[mood];
+    const num = list[Math.floor(Math.random() * list.length)];
+    getAyah(num);
+  };
+
+  const newAyah = () => {
+    const list = moods[currentMood];
+    const num = list[Math.floor(Math.random() * list.length)];
+    getAyah(num);
+  };
+
+  const goBack = () => {
+    setShowResult(false);
+    setCurrentMood("");
+    setAyahText("");
+    setMeaning("");
+    initBubbles(null);
+  };
+
+  const playAudio = () => {
+    if (audioRef.current && audioSrc) {
+      audioRef.current.src = audioSrc;
+      audioRef.current.play();
+    }
+  };
+
+  const playFullSurah = async () => {
+    if (!audioRef.current) return;
+    try {
+      const res = await fetch(
+        `https://api.alquran.cloud/v1/surah/${currentSurah}/ar.abdulsamad`,
+      );
+      const data = await res.json();
+      if (data.data.audio) {
+        audioRef.current.src = data.data.audio;
+        audioRef.current.play();
+      } else if (data.data.ayahs) {
+        let index = 0;
+        const playNext = () => {
+          if (index >= data.data.ayahs.length) return;
+          audioRef.current.src = data.data.ayahs[index].audio;
+          audioRef.current.play();
+          audioRef.current.onended = () => {
+            index++;
+            playNext();
+          };
+        };
+        playNext();
+      }
+    } catch (e) {
+      console.error("فشل تشغيل السورة", e);
+    }
+  };
+
+  const bgStyle = dark
+    ? { background: "radial-gradient(circle, #0f1f14, #000)" }
+    : { background: "linear-gradient(#f2fff7,#ffffff)" };
+
+  return (
+    <>
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; font-family: 'Amiri', serif; }
+
+        @keyframes gradientMove {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes press {
+          0% { transform: scale(1); }
+          50% { transform: scale(0.9); }
+          100% { transform: scale(1); }
+        }
+
+        .ayah-gradient-text {
+          background: linear-gradient(90deg, #1b5e20, #43a047, #1b5e20);
+          background-size: 200% 200%;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: gradientMove 6s ease infinite;
+        }
+
+        .mood-btn {
+          position: relative;
+          overflow: hidden;
+          transition: all 0.25s ease;
+        }
+        .mood-btn:hover {
+          transform: translateY(-4px) scale(1.05);
+        }
+        .mood-btn::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(120deg, transparent, rgba(255,255,255,0.7), transparent);
+          transition: 0.5s;
+        }
+        .mood-btn:hover::before {
+          left: 100%;
+        }
+        .mood-btn:active { animation: press 0.2s; }
+
+        .ctrl-btn {
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s;
+        }
+        .ctrl-btn:hover {
+          background: #43a047 !important;
+          transform: translateY(-2px);
+        }
+        .ctrl-btn:active { animation: press 0.2s; }
+
+        .channel-box {
+          animation: fadeUp 1s ease forwards;
+        }
+      `}</style>
+
+      <div
+        dir="rtl"
+        style={{
+          ...bgStyle,
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          transition: "background 1s",
+          position: "relative",
+          fontFamily: "'Amiri', serif",
+          overflow: "hidden",
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 0,
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
+          style={{
+            background: "rgba(255,255,255,0.7)",
+            backdropFilter: "blur(15px)",
+            WebkitBackdropFilter: "blur(15px)",
+            width: "90%",
+            maxWidth: 420,
+            padding: 24,
+            borderRadius: 25,
+            boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+            textAlign: "center",
+            zIndex: 1,
+            position: "relative",
+          }}
+        >
+          <h1
+            style={{
+              color: "#1b5e20",
+              fontSize: 30,
+              margin: "0 0 4px",
+              fontFamily: "'Amiri', serif",
+            }}
+          >
+            📖 القرآن لك
+          </h1>
+          <p style={{ color: "#555", fontSize: 16, margin: "0 0 16px" }}>
+            كيف تشعر اليوم؟
+          </p>
+
+          <button
+            onClick={() => setDark((d) => !d)}
+            className="mood-btn"
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginBottom: 14,
+              border: "none",
+              borderRadius: 16,
+              fontSize: 14,
+              cursor: "pointer",
+              fontWeight: "bold",
+              background: "rgba(255,255,255,0.6)",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+              fontFamily: "'Amiri', serif",
+            }}
+          >
+            🌙 {dark ? "الوضع النهاري" : "الوضع الليلي"}
+          </button>
+
+          {!showResult && (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2,1fr)",
+                gap: 10,
+              }}
+            >
+              {moodButtons.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => chooseMood(m.id)}
+                  className="mood-btn"
+                  style={{
+                    padding: "12px",
+                    border: "none",
+                    borderRadius: 16,
+                    fontSize: 15,
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    background: "rgba(255,255,255,0.6)",
+                    backdropFilter: "blur(10px)",
+                    boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+                    fontFamily: "'Amiri', serif",
+                  }}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {showResult && (
+            <div>
+              <div
+                style={{
+                  position: "relative",
+                  padding: 20,
+                  borderRadius: 20,
+                  background: "rgba(255,255,255,0.6)",
+                  backdropFilter: "blur(10px)",
+                  boxShadow: "0 0 20px rgba(46,125,50,0.2)",
+                  marginBottom: 12,
+                  minHeight: 100,
+                }}
+              >
+                {loading ? (
+                  <p style={{ color: "#2e7d32", fontSize: 18 }}>
+                    ⏳ جاري التحميل...
+                  </p>
+                ) : (
+                  <p
+                    className="ayah-gradient-text"
+                    style={{
+                      fontSize: 24,
+                      lineHeight: 2.2,
+                      whiteSpace: "pre-wrap",
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      margin: "0 0 8px",
+                      direction: "rtl",
+                      fontFamily: "'Amiri', serif",
+                    }}
+                  >
+                    {ayahText}
+                  </p>
+                )}
+                <p style={{ fontSize: 14, color: "#444", margin: "4px 0 0" }}>
+                  {meaning}
+                </p>
+                <p style={{ fontSize: 13, color: "#666", margin: "4px 0 0" }}>
+                  🎯 استمع وتدبّر هذه الآية
+                </p>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 8,
+                  justifyContent: "center",
+                  marginBottom: 16,
+                }}
+              >
+                {[
+                  { label: "🔄 آية أخرى", fn: newAyah },
+                  { label: "🎧 استماع", fn: playAudio },
+                  { label: "☺️ السورة كاملة", fn: playFullSurah },
+                  { label: "🔙 رجوع", fn: goBack },
+                ].map((btn) => (
+                  <button
+                    key={btn.label}
+                    onClick={btn.fn}
+                    className="ctrl-btn"
+                    style={{
+                      padding: "8px 14px",
+                      border: "none",
+                      borderRadius: 10,
+                      background: "#2e7d32",
+                      color: "white",
+                      cursor: "pointer",
+                      fontSize: 14,
+                      fontFamily: "'Amiri', serif",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {btn.label}
+                  </button>
+                ))}
+              </div>
+
+              <audio ref={audioRef} />
+
+              <div className="channel-box" style={{ textAlign: "center" }}>
+                <div
+                  style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg, #2e7d32, #66bb6a)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 28,
+                    margin: "0 auto 8px",
+                    border: "2px solid #2e7d32",
+                  }}
+                >
+                  🌿
+                </div>
+                <h3
+                  style={{
+                    margin: "4px 0",
+                    color: "#2e7d32",
+                    fontFamily: "'Amiri', serif",
+                  }}
+                >
+                  نسمات القرآن
+                </h3>
+                <a
+                  href="https://www.youtube.com/channel/UCHYJMygtSl60pThu6AUgeOw/"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: "inline-block",
+                    marginTop: 6,
+                    padding: "7px 14px",
+                    background: "#2e7d32",
+                    color: "white",
+                    borderRadius: 10,
+                    textDecoration: "none",
+                    fontSize: 14,
+                    fontFamily: "'Amiri', serif",
+                    transition: "0.3s",
+                  }}
+                >
+                  📺 زيارة القناة
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
